@@ -50,8 +50,8 @@ public final class HederaTokenService {
                 .getReceipt(client)
                 .accountId;
 
-        System.out.println("Alice: " + aliceId);
-        System.out.println("Bob: " + bobId);
+        System.out.println("Alice's account ID: " + aliceId);
+        System.out.println("Bob's account ID: " + bobId);
 
         Hbar aliceHbarBefore = new AccountBalanceQuery()
                 .setAccountId(aliceId)
