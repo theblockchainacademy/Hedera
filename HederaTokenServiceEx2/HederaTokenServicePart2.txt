@@ -1,0 +1,66 @@
+import com.hedera.hashgraph.sdk.*;
+import io.github.cdimascio.dotenv.Dotenv;
+
+import java.util.Collections;
+import java.util.concurrent.TimeoutException;
+
+public final class HederaTokenService {
+
+
+    //private static final AccountId OPERATOR_ID = AccountId.fromString(Objects.requireNonNull(Dotenv.load().get("OPERATOR_ID")));
+    //private static final AccountId OPERATOR_ID = AccountId.fromString("0.0.2084028");
+
+    // HEDERA_NETWORK defaults to testnet if not specified in dotenv
+    private static final AccountId OPERATOR_ID = AccountId.fromString(Dotenv.load().get("MY_ACCOUNT_ID"));
+    private static final PrivateKey OPERATOR_KEY = PrivateKey.fromString(Dotenv.load().get("MY_PRIVATE_KEY"));
+    private static final String HEDERA_NETWORK = Dotenv.load().get("HEDERA_NETWORK", "testnet");
+
+
+    private HederaTokenService() {
+    }
+
+    public static void main(String[] args) throws TimeoutException, PrecheckStatusException, ReceiptStatusException {
+        //create a client to interact with Hedera nodes on the specified network.
+        Client client = Client.forName(HEDERA_NETWORK);
+
+        // Defaults the operator account ID and key such that all generated transactions will be paid for
+        // by this account and be signed by this key
+        client.setOperator(OPERATOR_ID, OPERATOR_KEY);
+
+        // Create three accounts, Alice, Bob, and Charlie.  Alice will be the treasury for our example token.
+        // Fees only apply in transactions not involving the treasury, so we need two other accounts.
+
+        PrivateKey aliceKey = PrivateKey.generate();
+        AccountId aliceId = new AccountCreateTransaction()
+                .setInitialBalance(new Hbar(10))
+                .setKey(aliceKey)
+                .freezeWith(client)
+                .sign(aliceKey)
+                .execute(client)
+                .getReceipt(client)
+                .accountId;
+
+        PrivateKey bobKey = PrivateKey.generate();
+        AccountId bobId = new AccountCreateTransaction()
+                .setInitialBalance(new Hbar(10))
+                .setKey(bobKey)
+                .freezeWith(client)
+                .sign(bobKey)
+                .execute(client)
+                .getReceipt(client)
+                .accountId;
+
+        System.out.println("Alice: " + aliceId);
+        System.out.println("Bob: " + bobId);
+
+        Hbar aliceHbarBefore = new AccountBalanceQuery()
+                .setAccountId(aliceId)
+                .execute(client)
+                .hbars;
+
+        System.out.println("Alice's Hbar balance before token transfers: " + aliceHbarBefore);
+
+
+    }
+
+}
