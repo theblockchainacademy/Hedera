@@ -1,0 +1,36 @@
+//start build.gradle file
+plugins {
+    id 'java'
+}
+
+//group 'org.example'
+//version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    //implementation 'com.hedera.hashgraph:sdk:2.0.13'
+    implementation 'com.hedera.hashgraph:sdk:2.1.0'
+    //implementation 'com.hedera.hashgraph:sdk:2.1.0-beta.1'
+    implementation 'io.github.cdimascio:java-dotenv:5.2.1' // Module that stores your environment variables from a .env file
+    implementation "com.google.code.gson:gson:2.8.8"
+    implementation "org.slf4j:slf4j-simple:1.7.32"
+    implementation "io.grpc:grpc-netty-shaded:1.40.1"
+    implementation "com.google.errorprone:error_prone_core:2.9.0"
+
+}
+/*
+test {
+    useJUnitPlatform()
+}
+
+java {
+    sourceCompatibility = org.gradle.api.JavaVersion.VERSION_11
+    targetCompatibility = org.gradle.api.JavaVersion.VERSION_11
+}
+
+*/
+
+//end build.gradle file
