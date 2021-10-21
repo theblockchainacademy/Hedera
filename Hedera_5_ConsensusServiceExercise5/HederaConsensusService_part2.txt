@@ -18,6 +18,7 @@ public class HederaConsensusService {
         //Create the transaction
         TopicCreateTransaction transaction = new TopicCreateTransaction()
                 .setSubmitKey(myPrivateKey)
+                .setTopicMemo("First Message")
                 .setAdminKey(myPrivateKey);
 
         //Sign with the client operator private key and submit the transaction to a Hedera network
@@ -66,8 +67,7 @@ public class HederaConsensusService {
 
         //Print the account key to the console
         System.out.println(info);
-
-
+        
     }
 
 }
