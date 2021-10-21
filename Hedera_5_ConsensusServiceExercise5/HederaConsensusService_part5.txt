@@ -1,0 +1,161 @@
+import com.hedera.hashgraph.sdk.*;
+import com.google.protobuf.ByteString;
+import io.github.cdimascio.dotenv.Dotenv;
+import java.util.concurrent.TimeoutException;
+
+public class HederaConsensusService {
+
+    public static void main(String[] args) throws TimeoutException, PrecheckStatusException, ReceiptStatusException {
+
+        //Grab your Hedera testnet account ID and private key
+        AccountId myAccountId = AccountId.fromString(Dotenv.load().get("MY_ACCOUNT_ID"));
+        PrivateKey myPrivateKey = PrivateKey.fromString(Dotenv.load().get("MY_PRIVATE_KEY"));
+
+        //Create your Hedera testnet client
+        Client client = Client.forTestnet();
+        client.setOperator(myAccountId, myPrivateKey);
+
+        //Create the transaction
+        TopicCreateTransaction transaction = new TopicCreateTransaction()
+                .setSubmitKey(myPrivateKey)
+                .setTopicMemo("First Message")
+                .setAdminKey(myPrivateKey);
+
+        //Sign with the client operator private key and submit the transaction to a Hedera network
+        TransactionResponse txResponse = transaction.execute(client);
+
+        //Request the receipt of the transaction
+        TransactionReceipt receipt = txResponse.getReceipt(client);
+
+        //Get the topic ID
+        TopicId newTopicId = receipt.topicId;
+
+        System.out.println("\nThe new topic ID is " + newTopicId);
+
+
+        //Set a message for the topic ID
+        TopicMessageSubmitTransaction transactionMsgSub = new TopicMessageSubmitTransaction()
+                .setTopicId(newTopicId)
+                .setMessage("Good Day and welcome to Hedera Consensus Service");
+
+        String msg1 = "Good Day and welcome to Hedera Consensus Service";
+
+        //Get the message and retuen it to the console
+        ByteString getMessage = transactionMsgSub.getMessage();
+
+        String strgetMessage = getMessage.toString();
+
+        System.out.println("\nThe first msg:  " +strgetMessage);
+
+        //get informaiton
+
+        //Sign in with the client and start to submit transaction to a Hedera network, transaction consensus status
+        TransactionResponse txResponseMsgSub = transactionMsgSub.execute(client);
+
+        //Request the receipt of the transaction
+        TransactionReceipt receiptMsgSub = txResponseMsgSub.getReceipt(client);
+
+        //Get the transaction consensus status
+        Status transactionStatusMsgSub = receiptMsgSub.status;
+
+        System.out.println("\nThe transaction consensus status is " +transactionStatusMsgSub);
+
+        //Create the topic info query
+        TopicInfoQuery query = new TopicInfoQuery()
+                .setTopicId(newTopicId);
+
+        //Submit the query to a Hedera network
+        TopicInfo info = query.execute(client);
+
+        //Print the account key to the console
+        System.out.println(info);
+
+        //update the message
+        System.out.println("\n" + "Update Topic ---------------------------------------------------\n ");
+
+
+        TopicUpdateTransaction transactionUpdate = new TopicUpdateTransaction()
+                .setSubmitKey(myPrivateKey)
+                .setAdminKey(myPrivateKey)
+                .setTopicId(newTopicId)
+                .setTopicMemo("New message memo update");
+
+        //Sign in with the client and start to submit transaction to a Hedera network, transaction consensus status
+        TransactionResponse txResponseMsgSubUpdt = transactionUpdate.execute(client);
+
+        //Request the receipt of the transaction
+        TransactionReceipt receiptMsgSubUpdt = txResponseMsgSubUpdt.getReceipt(client);
+
+        //Get the transaction consensus status
+        Status transactionStatusMsgSubUpdt = receiptMsgSubUpdt.status;
+
+        System.out.println("\nThe transaction consensus status is " +transactionStatusMsgSubUpdt);
+
+        //Get the message and retuen it to the console
+        ByteString getMessageUpdt = transactionMsgSub.getMessage();
+
+        String mygetMessageUpdt = getMessageUpdt.toString();
+
+        System.out.println("\nThe message after the update:  " +mygetMessageUpdt);
+
+        //Create the account info query
+        TopicInfoQuery queryUpdt = new TopicInfoQuery()
+                .setTopicId(newTopicId);
+
+        //Submit the query to a Hedera network
+        TopicInfo infoUpdt = queryUpdt.execute(client);
+
+        //Print the account key to the console
+        System.out.println(infoUpdt);
+
+        //New message Topic
+        System.out.println("\n" + "New message for the same topic ----------------------------------------------\n ");
+
+        //String msg2 = msg1 + "  Now time to get to work with the Hedera Consensus Service";
+        String msg2 = "Time to work with the Hedera Consensus Service";
+
+        //Set a message for the topic ID
+        TopicMessageSubmitTransaction NewtransactionMsgSubmit = new TopicMessageSubmitTransaction()
+                .setTopicId(newTopicId)
+                .setMessage(msg2);
+
+        //Get the message and retuen it to the console
+        ByteString getNewMessage = NewtransactionMsgSubmit.getMessage();
+
+        String strgetNewMessage = getNewMessage.toString();
+
+        System.out.println("\nThe new msg:  " +strgetNewMessage);
+
+        //Create the account info query
+        TopicInfoQuery queryNewMsg = new TopicInfoQuery()
+                .setTopicId(newTopicId);
+
+        //Submit the query to a Hedera network
+        TopicInfo infoNewMsg = queryNewMsg.execute(client);
+
+        //Print the account key to the console
+        System.out.println(infoNewMsg);
+
+        //Delete a topic
+        System.out.println("\n" + "Delete a topic from the network ----------------------------------------------\n ");
+
+        TopicDeleteTransaction delNewMessage = new TopicDeleteTransaction()
+                .setTopicId(newTopicId);
+
+        //get the response from the delete
+        TransactionResponse txDelResponse = delNewMessage
+                .freezeWith(client)
+                .sign(myPrivateKey)
+                .execute(client);
+
+        //Request the receipt
+        TransactionReceipt delReceipt = txDelResponse.getReceipt(client);
+
+        //Get the transaction consensus status
+        Status delTxStatus = delReceipt.status;
+
+        System.out.println("The delete consensus: " + delTxStatus);
+
+    }
+
+}
