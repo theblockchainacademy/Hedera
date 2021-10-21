@@ -1,0 +1,48 @@
+import com.hedera.hashgraph.sdk.*;
+import com.google.protobuf.ByteString;
+import io.github.cdimascio.dotenv.Dotenv;
+import java.util.concurrent.TimeoutException;
+
+public class HederaConsensusService {
+
+    public static void main(String[] args) throws TimeoutException, PrecheckStatusException, ReceiptStatusException {
+
+        //Grab your Hedera testnet account ID and private key
+        AccountId myAccountId = AccountId.fromString(Dotenv.load().get("MY_ACCOUNT_ID"));
+        PrivateKey myPrivateKey = PrivateKey.fromString(Dotenv.load().get("MY_PRIVATE_KEY"));
+
+        //Create your Hedera testnet client
+        Client client = Client.forTestnet();
+        client.setOperator(myAccountId, myPrivateKey);
+
+        //Create the transaction
+        TopicCreateTransaction transaction = new TopicCreateTransaction()
+                .setSubmitKey(myPrivateKey)
+                .setAdminKey(myPrivateKey);
+
+        //Sign with the client operator private key and submit the transaction to a Hedera network
+        TransactionResponse txResponse = transaction.execute(client);
+
+        //Request the receipt of the transaction
+        TransactionReceipt receipt = txResponse.getReceipt(client);
+
+        //Get the topic ID
+        TopicId newTopicId = receipt.topicId;
+
+        System.out.println("\nThe new topic ID is " + newTopicId);
+
+
+        //Set a message for the topic ID
+        TopicMessageSubmitTransaction transactionMsgSub = new TopicMessageSubmitTransaction()
+                .setTopicId(newTopicId)
+                .setMessage("Good Day and welcome to Hedera Consensus Service");
+
+        ByteString getMessage = transactionMsgSub.getMessage();
+
+        String strgetMessage = getMessage.toString();
+
+        System.out.println("\nThe first msg:  " +strgetMessage);
+
+    }
+
+}
