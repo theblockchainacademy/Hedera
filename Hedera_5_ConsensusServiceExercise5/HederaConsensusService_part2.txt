@@ -43,6 +43,31 @@ public class HederaConsensusService {
 
         System.out.println("\nThe first msg:  " +strgetMessage);
 
+        //get information
+
+        //Sign in with the client and start to submit transaction to a Hedera network, transaction consensus status
+        TransactionResponse txResponseMsgSub = transactionMsgSub.execute(client);
+
+        //Request the receipt of the transaction
+        TransactionReceipt receiptMsgSub = txResponseMsgSub.getReceipt(client);
+
+        //Get the transaction consensus status
+        Status transactionStatusMsgSub = receiptMsgSub.status;
+
+        System.out.println("\nThe transaction consensus status is " +transactionStatusMsgSub);
+
+        //Create the account info query
+        TopicInfoQuery query = new TopicInfoQuery()
+                .setTopicId(newTopicId);
+
+        //Submit the query to a Hedera network
+        TopicInfo info = query.execute(client);
+
+        //Print the account key to the console
+        System.out.println(info);
+
+      
+
     }
 
 }
