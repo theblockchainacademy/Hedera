@@ -37,13 +37,14 @@ public class HederaConsensusService {
                 .setTopicId(newTopicId)
                 .setMessage("Good Day and welcome to Hedera Consensus Service");
 
+        //Get the message and retuen it to the console
         ByteString getMessage = transactionMsgSub.getMessage();
 
         String strgetMessage = getMessage.toString();
 
         System.out.println("\nThe first msg:  " +strgetMessage);
 
-        //get information
+        //get informaiton
 
         //Sign in with the client and start to submit transaction to a Hedera network, transaction consensus status
         TransactionResponse txResponseMsgSub = transactionMsgSub.execute(client);
@@ -66,7 +67,6 @@ public class HederaConsensusService {
         //Print the account key to the console
         System.out.println(info);
 
-      
 
     }
 
