@@ -30,12 +30,6 @@ public class HederaExamples {
 
         System.out.println("The new account ID is: " +newAccountId);
 
-        //Check the new account's balance
-        AccountBalance accountBalance = new AccountBalanceQuery()
-                .setAccountId(newAccountId)
-                .execute(client);
-
-        System.out.println("The new account balance is: " +accountBalance.hbars);
 
     }
 }
