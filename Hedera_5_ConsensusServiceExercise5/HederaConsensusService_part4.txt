@@ -119,7 +119,7 @@ public class HederaConsensusService {
                 .setTopicId(newTopicId)
                 .setMessage(msg2);
 
-        //Get the message and retuen it to the console
+        //Get the message and return it to the console
         ByteString getNewMessage = NewtransactionMsgSubmit.getMessage();
 
         String strgetNewMessage = getNewMessage.toString();
