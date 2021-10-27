@@ -15,11 +15,11 @@ public class HederaExamples {
         Client client = Client.forTestnet();
         client.setOperator(myAccountId, myPrivateKey);
 
-        // Generate a new key pair
+        // Code to generate a new key pair
         PrivateKey newAccountPrivateKey = PrivateKey.generate();
         PublicKey newAccountPublicKey = newAccountPrivateKey.getPublicKey();
 
-        //Create new account and assign the public key
+        //Code to create new account and assign the public key
         TransactionResponse newAccount = new AccountCreateTransaction()
                 .setKey(newAccountPublicKey)
                 .setInitialBalance( Hbar.fromTinybars(1000))
@@ -30,6 +30,11 @@ public class HederaExamples {
 
         System.out.println("The new account ID is: " +newAccountId);
 
+        //Check the new account's balance
+        AccountBalance accountBalance = new AccountBalanceQuery()
+                .setAccountId(newAccountId)
+                .execute(client);
+        System.out.println("The new account balance is: " +accountBalance.hbars);
 
     }
 }
