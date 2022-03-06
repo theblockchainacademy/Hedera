@@ -1,0 +1,104 @@
+import com.hedera.hashgraph.sdk.*;
+import io.github.cdimascio.dotenv.Dotenv;
+
+import java.util.concurrent.TimeoutException;
+
+public class HederaSchedule {
+
+    // HEDERA_NETWORK defaults to testnet if not specified in dotenv
+    private static final AccountId myAccountId = AccountId.fromString(Dotenv.load().get("MY_ACCOUNT_ID"));
+    private static final PrivateKey myPrivateKey = PrivateKey.fromString(Dotenv.load().get("MY_PRIVATE_KEY"));
+    private static final String HEDERA_NETWORK = Dotenv.load().get("HEDERA_NETWORK", "testnet");
+
+    public static void main(String[] args) throws TimeoutException, PrecheckStatusException, ReceiptStatusException {
+
+        //Create your Hedera testnet client
+        Client client = Client.forTestnet();
+        client.setOperator(myAccountId, myPrivateKey);
+
+        // Generate a new key pair
+        PrivateKey newAccountPrivateKey = PrivateKey.generate();
+        PublicKey newAccountPublicKey = newAccountPrivateKey.getPublicKey();
+
+        //Create new account and assign the public key
+        TransactionResponse newAccount = new AccountCreateTransaction()
+                .setKey(newAccountPublicKey)
+                .setInitialBalance( Hbar.fromTinybars(1000))
+                .execute(client);
+
+        // Get the new account ID
+        AccountId newAccountId = newAccount.getReceipt(client).accountId;
+
+        System.out.println("The new account ID is: " +newAccountId);
+
+        //Check the new account's balance
+        AccountBalance accountBalance = new AccountBalanceQuery()
+                .setAccountId(newAccountId)
+                .execute(client);
+
+        System.out.println("The new account balance is: " +accountBalance.hbars);
+
+        //Transfer hbar
+        TransferTransaction sendHbar = new TransferTransaction()
+                .addHbarTransfer(myAccountId, Hbar.fromTinybars(-500))
+                .addHbarTransfer(newAccountId, Hbar.fromTinybars(500));
+
+        //Schedule a transaction
+        TransactionResponse scheduleTransaction = new ScheduleCreateTransaction()
+                .setScheduledTransaction(sendHbar)
+                .execute(client);
+
+        //Get the receipt of the transaction
+        TransactionReceipt receipt = scheduleTransaction.getReceipt(client);
+
+        //Get the schedule ID
+        ScheduleId scheduleId = receipt.scheduleId;
+        System.out.println("The schedule ID is " +scheduleId);
+
+
+        //Get the scheduled transaction ID
+        TransactionId scheduledTxId = receipt.scheduledTransactionId;
+        System.out.println("The scheduled transaction ID is " +scheduledTxId);
+
+        //Submit the first signatures
+        TransactionResponse signature1 = new ScheduleSignTransaction()
+                .setScheduleId(scheduleId)
+                .freezeWith(client)
+                .sign(myPrivateKey)
+                .execute(client);
+
+        //Verify the transaction was successful and submit a schedule info request
+       // TransactionReceipt receipt1 = signature1.getReceipt(client);
+       // System.out.println("The transaction status is " +receipt1.status);
+
+        ScheduleInfo query1 = new ScheduleInfoQuery()
+                .setScheduleId(scheduleId)
+                .execute(client);
+
+        //Confirm the signature was added to the schedule
+        System.out.println(query1);
+
+        //Submit the second signature
+        TransactionResponse signature2 = new ScheduleSignTransaction()
+                .setScheduleId(scheduleId)
+                .freezeWith(client)
+                .sign(myPrivateKey)
+                .execute(client);
+
+        //Verify the transaction was successful
+        //TransactionReceipt receipt2 = signature2.getReceipt(client);
+        //System.out.println("The transaction status" +receipt2.status);
+
+        //Get the schedule info
+        ScheduleInfo query2 = new ScheduleInfoQuery()
+                .setScheduleId(scheduleId)
+                .execute(client);
+
+        System.out.println(query2);
+
+        //Get the scheduled transaction record
+        TransactionRecord scheduledTxRecord = TransactionId.fromString(scheduledTxId.toString()).getRecord(client);
+        System.out.println("The scheduled transaction record is: " +scheduledTxRecord);
+
+    }
+}
