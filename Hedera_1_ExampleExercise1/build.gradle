@@ -3,8 +3,8 @@ plugins {
     id 'java'
 }
 
-//group 'org.example'
-//version '1.0-SNAPSHOT'
+group 'org.example'
+version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
     //implementation 'com.hedera.hashgraph:sdk:2.0.13'
-    implementation 'com.hedera.hashgraph:sdk:2.1.0'
+    implementation 'com.hedera.hashgraph:sdk:2.5.0'
     //implementation 'com.hedera.hashgraph:sdk:2.1.0-beta.1'
     implementation 'io.github.cdimascio:java-dotenv:5.2.1' // Module that stores your environment variables from a .env file
     implementation "com.google.code.gson:gson:2.8.8"
@@ -21,7 +21,7 @@ dependencies {
     implementation "com.google.errorprone:error_prone_core:2.9.0"
 
 }
-/*
+
 test {
     useJUnitPlatform()
 }
@@ -31,6 +31,16 @@ java {
     targetCompatibility = org.gradle.api.JavaVersion.VERSION_11
 }
 
-*/
+tasks.addRule("Pattern: run<Example>: Runs an example.") { String taskName ->
+    if (taskName.startsWith("run")) {
+        task(taskName, type: JavaExec) {
+            classpath = sourceSets.main.runtimeClasspath
+            main = (taskName - "run") + "Example"
+            standardInput(System.in)
 
+            // NOTE: Uncomment to enable trace logs in the SDK during the examples
+            // jvmArgs "-Dorg.slf4j.simpleLogger.log.com.hedera.hashgraph=trace"
+        }
+    }
+}
 //end build.gradle file
